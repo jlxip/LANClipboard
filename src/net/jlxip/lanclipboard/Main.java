@@ -124,6 +124,8 @@ public class Main extends JFrame {
 						
 						byte[] type = new byte[1];
 						is.read(type);
+						
+						is.available();	// QUANTUM MECHANICS: IT CHANGES IF YOU SEE IT. So, it's necesssary to see what's available first. 
 						byte[] content = new byte[is.available()];
 						is.read(content);
 						
