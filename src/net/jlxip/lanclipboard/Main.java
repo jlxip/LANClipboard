@@ -125,9 +125,19 @@ public class Main extends JFrame {
 						byte[] type = new byte[1];
 						is.read(type);
 						
-						is.available();	// QUANTUM MECHANICS: IT CHANGES IF YOU SEE IT. So, it's necesssary to see what's available first. 
-						byte[] content = new byte[is.available()];
-						is.read(content);
+						ArrayList<Byte> allContent = new ArrayList<Byte>();
+						
+						while(is.available() > 0) {	// TODO: Find a better solution than this shit.
+							byte[] onebyte = new byte[1];
+							is.read(onebyte);
+							allContent.add(onebyte[0]);
+						}
+						
+						byte[] content = new byte[allContent.size()];
+						for(int i=0;i<allContent.size();i++) {
+							content[i] = allContent.get(i);
+						}
+						
 						
 						if(type[0] == 0x00) {	// STRING
 							Clipboard.setClipboard(new String(content));
