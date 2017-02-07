@@ -37,7 +37,8 @@ public class SocketThread extends Thread {
 				InputStream is = s.getInputStream();
 				s.getInputStream().read(recv);
 				if(recv[0] == 0x01) {	// Up?
-					s.getOutputStream().write(0x00);	// Sure!
+					if(usePassword) s.getOutputStream().write(0x01);	// Sure! PWD!
+					else s.getOutputStream().write(0x00);	// Sure! FREE!
 				} else {
 					if(exitWhenFinished) exit = true;
 					

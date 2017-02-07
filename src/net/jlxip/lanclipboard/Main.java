@@ -30,6 +30,9 @@ import javax.swing.JTabbedPane;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.border.EmptyBorder;
+import javax.swing.JSlider;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
 
 public class Main extends JFrame {
 	static final int PORT = 24812;
@@ -42,9 +45,11 @@ public class Main extends JFrame {
 	private JCheckBox protectWithPassword;
 	private JCheckBox exitWhenFinishedClient;
 	private JCheckBox exitWhenFinishedServer;
+	private JSlider timeoutSlider;
 	
 	private static final Pattern Pfile = Pattern.compile(Pattern.quote("|"));
 	private static final Pattern Pfilename = Pattern.compile(Pattern.quote("$"));
+	private static final Pattern Pspace = Pattern.compile(Pattern.quote(" "));
 
 	public static void main(String[] args) {
 		try {
@@ -99,7 +104,25 @@ public class Main extends JFrame {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
 				if(arg0.getButton() == MouseEvent.BUTTON1 && arg0.getClickCount() == 2 && !list.isSelectionEmpty()) {
-					String host = list.getSelectedValue();
+					int timeout = 0;
+					switch(timeoutSlider.getValue()) {
+						case 0:
+							timeout = 500;
+							break;
+						case 1:
+							timeout = 1000;
+							break;
+						case 2:
+							timeout = 2500;
+							break;
+						case 3:
+							timeout = 5000;
+							break;
+					}
+					CheckPortOpenThread.timeout = timeout;
+					
+					String host = Pspace.split(list.getSelectedValue())[Pspace.split(list.getSelectedValue()).length-1];	// LAST SPACE OF SELECTED VALUE
+					
 					try {
 						Socket socket = new Socket(host, PORT);
 						socket.getOutputStream().write(0x00);
@@ -127,7 +150,7 @@ public class Main extends JFrame {
 						
 						ArrayList<Byte> allContent = new ArrayList<Byte>();
 						
-						while(is.available() > 0) {	// TODO: Find a better solution than this shit.
+						while(is.available() > 0) {	// TODO: This is a non-orthodox solution.
 							byte[] onebyte = new byte[1];
 							is.read(onebyte);
 							allContent.add(onebyte[0]);
@@ -182,8 +205,33 @@ public class Main extends JFrame {
 		
 		exitWhenFinishedClient = new JCheckBox("Exit when finished");
 		exitWhenFinishedClient.setSelected(true);
-		exitWhenFinishedClient.setBounds(117, 13, 144, 25);
+		exitWhenFinishedClient.setBounds(117, 13, 131, 25);
 		panel.add(exitWhenFinishedClient);
+		
+		timeoutSlider = new JSlider();
+		timeoutSlider.setToolTipText("Timeout of 1000ms");
+		timeoutSlider.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent arg0) {
+				switch(timeoutSlider.getValue()) {
+					case 0:
+						timeoutSlider.setToolTipText("Timeout of 500ms");
+						break;
+					case 1:
+						timeoutSlider.setToolTipText("Timeout of 1000ms");
+						break;
+					case 2:
+						timeoutSlider.setToolTipText("Timeout of 2500ms");
+						break;
+					case 3:
+						timeoutSlider.setToolTipText("Timeout of 5000ms");
+						break;
+				}
+			}
+		});
+		timeoutSlider.setValue(1);
+		timeoutSlider.setMaximum(3);
+		timeoutSlider.setBounds(256, 12, 161, 26);
+		panel.add(timeoutSlider);
 		
 		JPanel panel_1 = new JPanel();
 		tabbedPane.addTab("Send", null, panel_1, null);

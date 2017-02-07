@@ -11,6 +11,7 @@ public class UpdateListThread extends Thread {
 	JLabel state = null;
 	JList<String> list = null;
 	private static final Pattern Pdot = Pattern.compile(Pattern.quote("."));
+	private static final Pattern Pspace = Pattern.compile(Pattern.quote(" "));
 	
 	public UpdateListThread(JLabel state, JList<String> list) {
 		this.state = state;
@@ -20,17 +21,11 @@ public class UpdateListThread extends Thread {
 	public void run() {
 		state.setText("State: searching...");
 		
-		ArrayList<String> hosts = null;
+		ArrayList<String> hosts = new ArrayList<String>();
 		
 		ArrayList<String> IPv4s = LAN.getIPv4s();
 		
-		/*
-		 * WARNING
-		 * MAYBE THE FIRST FIELD IN THE ARRAYLIST IPv4s IS NOT ALWAYS 127.0.0.1
-		 * IN THAT CASE, CHANGE THE INITIAL VALUE OF THE FOR LOOP TO ZERO
-		 * */
-		
-		for(int i=1;i<IPv4s.size();i++) {	// Skip the first one (127.0.0.1)
+		for(int i=0;i<IPv4s.size();i++) {
 			String subnet = "";
 			String[] dots = Pdot.split(IPv4s.get(i));
 			for(int j=0;j<dots.length-1;j++) {	// All but the last one
@@ -41,15 +36,32 @@ public class UpdateListThread extends Thread {
 			}
 			
 			ArrayList<String> reachableHosts = LAN.getHosts(subnet);
-			hosts = reachableHosts;
+			
+			for(int j=0;j<reachableHosts.size();j++) {
+				String toAdd = "";
+				String realHost = Pspace.split(reachableHosts.get(j))[Pspace.split(reachableHosts.get(j)).length-1];
+				
+				if(realHost.equals(IPv4s.get(i))) {
+					toAdd += "[ME] ";
+				}
+				
+				toAdd += reachableHosts.get(j);
+				hosts.add(toAdd);
+			}
 		}
 		
+		DefaultListModel<String> model = new DefaultListModel<String>();
 		for(int i=0;i<hosts.size();i++) {
-			DefaultListModel<String> model = new DefaultListModel<String>();
 			model.addElement(hosts.get(i));
-			list.setModel(model);
 		}
+		list.setModel(model);
 		
 		state.setText("State: finished.");
+		
+		try {
+			this.finalize();
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
 	}
 }
