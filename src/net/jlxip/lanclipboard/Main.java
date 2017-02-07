@@ -172,7 +172,14 @@ public class Main extends JFrame {
 								String filename = new String(Base64.getDecoder().decode(Pfilename.split(files[i])[0].getBytes()));
 								byte[] Bfile = Base64.getDecoder().decode(Pfilename.split(files[i])[1].getBytes());
 								
-								File file = new File(System.getenv("TEMP") + File.separator + filename);
+								String TEMPORAL_PATH = "";
+								if(System.getProperty("os.name").toLowerCase().contains("windows")) {
+									TEMPORAL_PATH = System.getenv("TEMP");
+								} else if(System.getProperty("os.name").toLowerCase().contains("linux")) {
+									TEMPORAL_PATH = "/tmp";
+								}
+								
+								File file = new File(TEMPORAL_PATH + File.separator + filename);
 								FileOutputStream fos = new FileOutputStream(file);
 								fos.write(Bfile);
 								fos.close();
