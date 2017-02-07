@@ -22,5 +22,11 @@ It can be done just selecting this checkbox:<br>
 Thus, when a client tries to connect, this window shall appear:<br>
 ![Incorrect password](http://i.imgur.com/Ni0X2Cm.gif)<br>
 The password is sent to the server, and checked there. This way, it should be safe enough.<br>
-But **watch out**, in order to copy documents from one computer to another, a copy is stored in the client's temporal directory (_%temp%_, in Windows); so make sure to delete it whether your file contains sensitive information.
+But **watch out**, in order to copy documents from one computer to another, a copy is stored in the client's temporal directory (_%temp%_, on Windows; _/tmp_, on Linux); so make sure to delete it whether your file contains sensitive information.
 <br><br>
+
+## FAQ
+### No server found
+Is your server running and no IP is found? Well, try incrementing the timeout, like this:<br>
+![No Server Found](http://i.imgur.com/gD5xnIF.gif)<br>
+<br>
