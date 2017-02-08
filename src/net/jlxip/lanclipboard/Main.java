@@ -26,13 +26,13 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JScrollPane;
+import javax.swing.JSlider;
 import javax.swing.JTabbedPane;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.border.EmptyBorder;
-import javax.swing.JSlider;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 public class Main extends JFrame {
 	static final int PORT = 24812;
@@ -222,6 +222,9 @@ public class Main extends JFrame {
 		panel.add(exitWhenFinishedClient);
 		
 		timeoutSlider = new JSlider();
+		timeoutSlider.setPaintLabels(true);
+		timeoutSlider.setPaintTicks(true);
+		timeoutSlider.setMajorTickSpacing(1);
 		timeoutSlider.setToolTipText("Timeout of 1000ms");
 		timeoutSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent arg0) {
@@ -243,8 +246,13 @@ public class Main extends JFrame {
 		});
 		timeoutSlider.setValue(1);
 		timeoutSlider.setMaximum(3);
-		timeoutSlider.setBounds(256, 12, 161, 26);
+		timeoutSlider.setBounds(308, 77, 109, 52);
 		panel.add(timeoutSlider);
+		
+		JLabel lblScanTimeout = new JLabel("Scan timeout:");
+		lblScanTimeout.setToolTipText("Each attempt");
+		lblScanTimeout.setBounds(308, 53, 109, 16);
+		panel.add(lblScanTimeout);
 		
 		JPanel panel_1 = new JPanel();
 		tabbedPane.addTab("Send", null, panel_1, null);
