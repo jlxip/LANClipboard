@@ -1,6 +1,5 @@
 package net.jlxip.lanclipboard;
 
-import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -43,6 +42,8 @@ public class Main extends JFrame {
 	private JList<String> list;
 	private JLabel state;
 	private JCheckBox protectWithPassword;
+	private JButton btnStartSharing;
+	private JButton quickRun;
 	private JCheckBox exitWhenFinishedClient;
 	private JCheckBox exitWhenFinishedServer;
 	private JSlider timeoutSlider;
@@ -71,16 +72,17 @@ public class Main extends JFrame {
 		setTitle("LANClipboard");
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 450, 327);
+		setBounds(100, 100, 436, 357);
 		setLocationRelativeTo(null);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
-		contentPane.setLayout(new BorderLayout(0, 0));
+		contentPane.setLayout(null);
 		
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-		tabbedPane.setLocation(135, 5);
-		contentPane.add(tabbedPane, BorderLayout.CENTER);
+		tabbedPane.setSize(432, 280);
+		tabbedPane.setLocation(0, 42);
+		contentPane.add(tabbedPane);
 		
 		JPanel panel = new JPanel();
 		tabbedPane.addTab("Receive", null, panel, null);
@@ -258,22 +260,10 @@ public class Main extends JFrame {
 		tabbedPane.addTab("Send", null, panel_1, null);
 		panel_1.setLayout(null);
 		
-		JButton btnStartSharing = new JButton("START SHARING");
+		btnStartSharing = new JButton("START SHARING");
 		btnStartSharing.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				try {
-					ServerSocket ss = new ServerSocket(PORT);
-
-					new SocketThread(ss, protectWithPassword.isSelected(), new String(password.getPassword()), exitWhenFinishedServer.isSelected()).start();
-					
-					btnStartSharing.setEnabled(false);
-					btnStartSharing.setText("SHARING");
-					exitWhenFinishedServer.setEnabled(false);
-					protectWithPassword.setEnabled(false);
-					password.setEnabled(false);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+				startSharing();
 			}
 		});
 		btnStartSharing.setBounds(12, 159, 405, 53);
@@ -297,10 +287,40 @@ public class Main extends JFrame {
 		exitWhenFinishedServer.setBounds(12, 20, 148, 25);
 		panel_1.add(exitWhenFinishedServer);
 		
+		JLabel lblQuickAccess = new JLabel("Quick access:");
+		lblQuickAccess.setBounds(12, 13, 78, 16);
+		contentPane.add(lblQuickAccess);
+		
+		quickRun = new JButton("Run server with default configuration");
+		quickRun.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				startSharing();
+			}
+		});
+		quickRun.setBounds(102, 9, 253, 25);
+		contentPane.add(quickRun);
+		
 		update();
 	}
 	
 	private void update() {
 		new UpdateListThread(state, list).start();
+	}
+	
+	private void startSharing() {
+		try {
+			ServerSocket ss = new ServerSocket(PORT);
+
+			new SocketThread(ss, protectWithPassword.isSelected(), new String(password.getPassword()), exitWhenFinishedServer.isSelected()).start();
+			
+			quickRun.setEnabled(false);
+			btnStartSharing.setEnabled(false);
+			btnStartSharing.setText("SHARING");
+			exitWhenFinishedServer.setEnabled(false);
+			protectWithPassword.setEnabled(false);
+			password.setEnabled(false);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }
