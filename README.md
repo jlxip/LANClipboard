@@ -6,7 +6,9 @@ _Share your clipboard through your LAN._
 ## HOW TO
 ### Start the server
 Go to 'Send' tab, and just click 'START SHARING'. That simple.<br>
-![Start Sharing](http://i.imgur.com/cLhILeF.gif)
+![Start Sharing](http://i.imgur.com/cLhILeF.gif)<br>
+But now, quicker than ever:<br>
+![Quick Share](http://i.imgur.com/SFtUL9r.gif)<br>
 <br><br>
 
 ### Start the client
