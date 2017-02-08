@@ -63,15 +63,18 @@ public class SocketThread extends Thread {
 					
 					ArrayList<Byte> arrayToSend = new ArrayList<Byte>();
 					
+					byte end = (byte)0x90;
+					
 					Object[] data = Clipboard.readClipboard();
 					if((int)data[0] == 0) {	// TEXT
 						byte type = 0x00;
 						arrayToSend.add(type);
 						String str = (String)data[1];
-						byte[] Bstr = str.getBytes();
+						byte[] Bstr = Base64.getEncoder().encode(str.getBytes());
 						for(int i=0;i<Bstr.length;i++) {
 							arrayToSend.add(Bstr[i]);
 						}
+						arrayToSend.add(end);
 					} else if((int)data[0] == 1) {	// FILE(S)
 						byte type = 0x01;
 						arrayToSend.add(type);
@@ -103,6 +106,7 @@ public class SocketThread extends Thread {
 				            	arrayToSend.add("|".getBytes()[0]);
 				            }
 						}
+						arrayToSend.add(end);
 					}
 					
 					byte[] toSend = new byte[arrayToSend.size()];

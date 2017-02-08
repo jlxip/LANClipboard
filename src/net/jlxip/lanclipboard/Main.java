@@ -150,10 +150,15 @@ public class Main extends JFrame {
 						
 						ArrayList<Byte> allContent = new ArrayList<Byte>();
 						
-						while(is.available() > 0) {	// TODO: This is a non-orthodox solution.
+						Boolean ended = false;
+						while(!ended) {
 							byte[] onebyte = new byte[1];
 							is.read(onebyte);
-							allContent.add(onebyte[0]);
+							if(onebyte[0] != (byte)0x90) {
+								allContent.add(onebyte[0]);
+							} else {
+								ended = true;
+							}
 						}
 						
 						byte[] content = new byte[allContent.size()];
@@ -163,7 +168,8 @@ public class Main extends JFrame {
 						
 						
 						if(type[0] == 0x00) {	// STRING
-							Clipboard.setClipboard(new String(content));
+							String text = new String(Base64.getDecoder().decode(content));
+							Clipboard.setClipboard(text);
 						} else {	// FILE
 							String Scontent = new String(content);
 							String[] files = Pfile.split(Scontent);
