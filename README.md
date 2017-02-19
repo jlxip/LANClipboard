@@ -1,5 +1,5 @@
 # LANClipboard
-_Share your clipboard through your LAN._<br>
+_Share your clipboard (files and text) through your LAN._<br>
 **[Download](https://github.com/jlxip/LANClipboard/releases)**
 
 
