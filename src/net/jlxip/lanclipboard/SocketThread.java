@@ -16,14 +16,15 @@ import java.util.List;
 public class SocketThread extends Thread {
 	ServerSocket ss = null;
 	Boolean usePassword = null;
-	String password = null;
+	String Hpassword = null;
 	Boolean exitWhenFinished = null;
 	
 	public SocketThread(ServerSocket ss, Boolean usePassword, String password, Boolean exitWhenFinished) {
 		this.ss = ss;
 		this.usePassword = usePassword;
-		this.password = password;
 		this.exitWhenFinished = exitWhenFinished;
+		
+		this.Hpassword = Main.hash(password);
 	}
 	
 	public void run() {
@@ -50,7 +51,8 @@ public class SocketThread extends Thread {
 						is.read(restBytes);
 						
 						String enteredPassword = new String(firstByte) + new String(restBytes);
-						if(enteredPassword.equals(password)) {
+						
+						if(enteredPassword.equals(Hpassword)) {
 							os.write(new byte[]{ 0x00 });
 						} else {
 							os.write(new byte[]{ 0x01 });
