@@ -13,12 +13,18 @@ import java.util.Base64;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.swing.JOptionPane;
+
 public class SocketThread extends Thread {
 	ServerSocket ss = null;
 	Boolean usePassword = null;
 	String Hpassword = null;
 	Boolean exitWhenFinished = null;
 	private static final String SALT = CryptoFunctions.generateRandomSalt();	// Random salt!
+	
+	// BRUTE FORCE PROTECTION
+	private static final int LimitFailedPasswords = 10;		// TODO: Let user choose the limit.
+	private static int FailedPasswords = 0;
 	
 	public SocketThread(ServerSocket ss, Boolean usePassword, String password, Boolean exitWhenFinished) {
 		this.ss = ss;
@@ -32,6 +38,18 @@ public class SocketThread extends Thread {
 		Boolean exit = false;
 		
 		while(!exit) {
+			if(FailedPasswords >= LimitFailedPasswords) {
+				try {
+					ss.close();
+				} catch (IOException e) {
+					System.out.println("The server could not be stopped.");
+					e.printStackTrace();
+				}
+				
+				JOptionPane.showMessageDialog(null, "There were " + LimitFailedPasswords + " failed attempts of authentication.\nFor security reasons, the server has been stopped. Please, restart the program and choose a diferent password.");
+				System.exit(0);
+			}
+			
 			try {
 				Socket s = ss.accept();
 				byte[] recv = new byte[1];
@@ -58,7 +76,8 @@ public class SocketThread extends Thread {
 						
 						if(enteredPassword.equals(Hpassword)) {
 							os.write(new byte[]{ 0x00 });
-						} else {
+						} else {	// Wrong password! :(
+							FailedPasswords++;
 							os.write(new byte[]{ 0x01 });
 							s.close();
 							continue;
