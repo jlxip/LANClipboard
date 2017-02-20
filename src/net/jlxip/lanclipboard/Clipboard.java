@@ -24,13 +24,16 @@ public class Clipboard {
 		
 		try {
 			DataFlavor[] b = Toolkit.getDefaultToolkit().getSystemClipboard().getAvailableDataFlavors();
-			if(b[0].equals(DataFlavor.stringFlavor)) {	// STRING
+			if(b[0].equals(DataFlavor.stringFlavor) || b[0].toString().toLowerCase().contains("text")) {	// STRING
 				type = 0;
 				type0 = (String)Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.stringFlavor);
 				if(type0 == null) type0 = "";	// Is this necessary?
 			} else if(b[0].equals(DataFlavor.javaFileListFlavor)) {	// FILE
 				type = 1;
 				type1 = (List<File>)Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.javaFileListFlavor);
+			} else {
+				System.out.println("BUG BUG BUG BUG BUG");
+				System.out.println("TYPE: "+b[0]);
 			}
 		} catch (HeadlessException e) {
 			e.printStackTrace();
