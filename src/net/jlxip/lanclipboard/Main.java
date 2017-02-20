@@ -8,12 +8,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -54,10 +51,6 @@ public class Main extends JFrame {
 	private static final Pattern Pfile = Pattern.compile(Pattern.quote("|"));
 	private static final Pattern Pfilename = Pattern.compile(Pattern.quote("$"));
 	private static final Pattern Pspace = Pattern.compile(Pattern.quote(" "));
-	
-	public static final String SALT = "B^7/]~|L/>|yTX1#.n&Ob-qa";
-	public static final String HASH_ALGORITHM = "SHA-256";
-	public static final String HASH_ENCODING = "UTF-8";
 
 	public static void main(String[] args) {
 		try {
@@ -141,9 +134,20 @@ public class Main extends JFrame {
 						byte[] usePassword = new byte[1];
 						is.read(usePassword);
 						if(usePassword[0] == 0x01) {
+							byte[] bSALT = new byte[CryptoFunctions.SALT_LENGTH];
+							while(!(is.available() == CryptoFunctions.SALT_LENGTH)) { // Waiting until the whole salt is sent.
+								try {
+									Thread.sleep(10);
+								} catch (InterruptedException e) {
+									e.printStackTrace();
+								}
+							}
+							is.read(bSALT);
+							final String SALT = new String(bSALT);
+							
 							state.setText("State: asking password.");
 							String password = EnterPassword.run();
-							String Hpassword = hash(password);
+							String Hpassword = CryptoFunctions.hash(password, SALT);
 							socket.getOutputStream().write(Hpassword.getBytes());
 							byte[] correct = new byte[1];
 							is.read(correct);
@@ -164,11 +168,8 @@ public class Main extends JFrame {
 						while(!ended) {
 							byte[] onebyte = new byte[1];
 							is.read(onebyte);
-							if(onebyte[0] != (byte)0x90) {
-								allContent.add(onebyte[0]);
-							} else {
-								ended = true;
-							}
+							if(onebyte[0] != (byte)0x90) allContent.add(onebyte[0]);
+							else ended = true;
 						}
 						
 						byte[] content = new byte[allContent.size()];
@@ -330,27 +331,5 @@ public class Main extends JFrame {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
-	
-	public static String hash(String password) {
-		password += SALT;
-		
-		MessageDigest md = null;
-		try {
-			md = MessageDigest.getInstance(HASH_ALGORITHM);
-		} catch (NoSuchAlgorithmException e) {
-			// This shouldn't be called.
-		}
-		try {
-			md.update(password.getBytes(HASH_ENCODING));
-		} catch (UnsupportedEncodingException e) {
-			// This shouldn't be called.
-		}
-		
-		String Hpassword = String.format("%064x", new java.math.BigInteger(1, md.digest()));
-		
-		password = null;
-		
-		return Hpassword;
 	}
 }

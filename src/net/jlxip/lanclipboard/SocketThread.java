@@ -18,13 +18,14 @@ public class SocketThread extends Thread {
 	Boolean usePassword = null;
 	String Hpassword = null;
 	Boolean exitWhenFinished = null;
+	private static final String SALT = CryptoFunctions.generateRandomSalt();	// Random salt!
 	
 	public SocketThread(ServerSocket ss, Boolean usePassword, String password, Boolean exitWhenFinished) {
 		this.ss = ss;
 		this.usePassword = usePassword;
 		this.exitWhenFinished = exitWhenFinished;
 		
-		this.Hpassword = Main.hash(password);
+		this.Hpassword = CryptoFunctions.hash(password, SALT);
 	}
 	
 	public void run() {
@@ -45,6 +46,9 @@ public class SocketThread extends Thread {
 					
 					if(usePassword) {
 						os.write(new byte[]{ 0x01 });
+						
+						os.write(SALT.getBytes()); // SEND SALT
+						
 						byte[] firstByte = new byte[1];
 						is.read(firstByte);
 						byte[] restBytes = new byte[is.available()];
@@ -76,7 +80,6 @@ public class SocketThread extends Thread {
 						for(int i=0;i<Bstr.length;i++) {
 							arrayToSend.add(Bstr[i]);
 						}
-						arrayToSend.add(end);
 					} else if((int)data[0] == 1) {	// FILE(S)
 						byte type = 0x01;
 						arrayToSend.add(type);
@@ -108,8 +111,8 @@ public class SocketThread extends Thread {
 				            	arrayToSend.add("|".getBytes()[0]);
 				            }
 						}
-						arrayToSend.add(end);
 					}
+					arrayToSend.add(end);
 					
 					byte[] toSend = new byte[arrayToSend.size()];
 					for(int i=0;i<arrayToSend.size();i++) {
