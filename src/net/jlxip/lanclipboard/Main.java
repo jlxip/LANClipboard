@@ -32,6 +32,7 @@ import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.border.TitledBorder;
 
 public class Main extends JFrame {
 	static final int PORT = 24812;
@@ -47,6 +48,8 @@ public class Main extends JFrame {
 	private JCheckBox exitWhenFinishedClient;
 	private JCheckBox exitWhenFinishedServer;
 	private JSlider timeoutSlider;
+	private JLabel lblMaxWrongPassword;
+	private JSlider maxWrongPasswordAttemptsSlider;
 	
 	private static final Pattern Pfile = Pattern.compile(Pattern.quote("|"));
 	private static final Pattern Pfilename = Pattern.compile(Pattern.quote("$"));
@@ -72,7 +75,7 @@ public class Main extends JFrame {
 		setTitle("LANClipboard");
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 436, 357);
+		setBounds(100, 100, 436, 415);
 		setLocationRelativeTo(null);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -80,7 +83,7 @@ public class Main extends JFrame {
 		contentPane.setLayout(null);
 		
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-		tabbedPane.setSize(432, 280);
+		tabbedPane.setSize(432, 338);
 		tabbedPane.setLocation(0, 42);
 		contentPane.add(tabbedPane);
 		
@@ -275,26 +278,51 @@ public class Main extends JFrame {
 				startSharing();
 			}
 		});
-		btnStartSharing.setBounds(12, 159, 405, 53);
+		btnStartSharing.setBounds(8, 242, 409, 53);
 		panel_1.add(btnStartSharing);
-		
-		protectWithPassword = new JCheckBox("Protect with password");
-		protectWithPassword.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				password.setEnabled(protectWithPassword.isSelected());
-			}
-		});
-		protectWithPassword.setBounds(12, 65, 155, 25);
-		panel_1.add(protectWithPassword);
-		
-		password = new JPasswordField();
-		password.setEnabled(false);
-		password.setBounds(175, 63, 242, 28);
-		panel_1.add(password);
 		
 		exitWhenFinishedServer = new JCheckBox("Exit when finished");
 		exitWhenFinishedServer.setBounds(12, 20, 148, 25);
 		panel_1.add(exitWhenFinishedServer);
+		
+		JPanel securityPanel = new JPanel();
+		securityPanel.setBorder(new TitledBorder(null, "Security", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		securityPanel.setBounds(12, 54, 405, 175);
+		panel_1.add(securityPanel);
+		securityPanel.setLayout(null);
+		
+		password = new JPasswordField();
+		password.setBounds(166, 23, 227, 28);
+		securityPanel.add(password);
+		password.setEnabled(false);
+		
+		maxWrongPasswordAttemptsSlider = new JSlider();
+		maxWrongPasswordAttemptsSlider.setBounds(12, 92, 256, 70);
+		securityPanel.add(maxWrongPasswordAttemptsSlider);
+		maxWrongPasswordAttemptsSlider.setEnabled(false);
+		maxWrongPasswordAttemptsSlider.setMinimum(1);
+		maxWrongPasswordAttemptsSlider.setValue(10);
+		maxWrongPasswordAttemptsSlider.setMaximum(20);
+		maxWrongPasswordAttemptsSlider.setMinorTickSpacing(1);
+		maxWrongPasswordAttemptsSlider.setMajorTickSpacing(19);
+		maxWrongPasswordAttemptsSlider.setPaintLabels(true);
+		maxWrongPasswordAttemptsSlider.setPaintTicks(true);
+		
+		lblMaxWrongPassword = new JLabel("Max. wrong password attempts:");
+		lblMaxWrongPassword.setBounds(12, 71, 200, 16);
+		securityPanel.add(lblMaxWrongPassword);
+		lblMaxWrongPassword.setEnabled(false);
+		
+		protectWithPassword = new JCheckBox("Protect with password");
+		protectWithPassword.setBounds(8, 24, 155, 25);
+		securityPanel.add(protectWithPassword);
+		protectWithPassword.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				password.setEnabled(protectWithPassword.isSelected());
+				lblMaxWrongPassword.setEnabled(protectWithPassword.isSelected());
+				maxWrongPasswordAttemptsSlider.setEnabled(protectWithPassword.isSelected());
+			}
+		});
 		
 		JLabel lblQuickAccess = new JLabel("Quick access:");
 		lblQuickAccess.setBounds(12, 13, 78, 16);
@@ -320,7 +348,7 @@ public class Main extends JFrame {
 		try {
 			ServerSocket ss = new ServerSocket(PORT);
 
-			new SocketThread(ss, protectWithPassword.isSelected(), new String(password.getPassword()), exitWhenFinishedServer.isSelected()).start();
+			new SocketThread(ss, protectWithPassword.isSelected(), new String(password.getPassword()), exitWhenFinishedServer.isSelected(), maxWrongPasswordAttemptsSlider.getValue()).start();
 			
 			quickRun.setEnabled(false);
 			btnStartSharing.setEnabled(false);
@@ -328,6 +356,8 @@ public class Main extends JFrame {
 			exitWhenFinishedServer.setEnabled(false);
 			protectWithPassword.setEnabled(false);
 			password.setEnabled(false);
+			lblMaxWrongPassword.setEnabled(false);
+			maxWrongPasswordAttemptsSlider.setEnabled(false);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

@@ -23,13 +23,14 @@ public class SocketThread extends Thread {
 	private static final String SALT = CryptoFunctions.generateRandomSalt();	// Random salt!
 	
 	// BRUTE FORCE PROTECTION
-	private static final int LimitFailedPasswords = 10;		// TODO: Let user choose the limit.
+	private static int LimitFailedPasswords = 10;	// Just in case something goes wrong (it shouldn't), I set it to 10.
 	private static int FailedPasswords = 0;
 	
-	public SocketThread(ServerSocket ss, Boolean usePassword, String password, Boolean exitWhenFinished) {
+	public SocketThread(ServerSocket ss, Boolean usePassword, String password, Boolean exitWhenFinished, int LimitFailedPasswords) {
 		this.ss = ss;
 		this.usePassword = usePassword;
 		this.exitWhenFinished = exitWhenFinished;
+		SocketThread.LimitFailedPasswords = LimitFailedPasswords;
 		
 		this.Hpassword = CryptoFunctions.hash(password, SALT);
 	}
@@ -46,7 +47,7 @@ public class SocketThread extends Thread {
 					e.printStackTrace();
 				}
 				
-				JOptionPane.showMessageDialog(null, "There were " + LimitFailedPasswords + " failed attempts of authentication.\nFor security reasons, the server has been stopped. Please, restart the program and choose a diferent password.");
+				JOptionPane.showMessageDialog(null, "There were " + LimitFailedPasswords + " failed attempts of authentication.\nFor security reasons, the server has been stopped.\nPlease, restart the program and choose a diferent password.");
 				System.exit(0);
 			}
 			
