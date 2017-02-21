@@ -346,6 +346,11 @@ public class Main extends JFrame {
 	
 	private void startSharing() {
 		try {
+			if(new String(password.getPassword()).equals("")) {
+				JOptionPane.showMessageDialog(null, "The password field is empty!");
+				return;
+			}
+			
 			ServerSocket ss = new ServerSocket(PORT);
 
 			new SocketThread(ss, protectWithPassword.isSelected(), new String(password.getPassword()), exitWhenFinishedServer.isSelected(), maxWrongPasswordAttemptsSlider.getValue()).start();
