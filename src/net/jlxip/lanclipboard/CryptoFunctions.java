@@ -3,6 +3,7 @@ package net.jlxip.lanclipboard;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Random;
 
 public class CryptoFunctions {
@@ -30,16 +31,11 @@ public class CryptoFunctions {
 		return Hpassword;
 	}
 	
-	private static final String SALT_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890$%&/()[]{}.-~<>|'!@#";
 	public static final int SALT_LENGTH = 18;
-	public static String generateRandomSalt() {	// Main source: https://goo.gl/wRBdKm
-		StringBuilder salt = new StringBuilder();
-        Random rnd = new Random();
-        while (salt.length() < SALT_LENGTH) {
-            int index = (int) (rnd.nextFloat() * SALT_CHARS.length());
-            salt.append(SALT_CHARS.charAt(index));
-        }
-        
-        return salt.toString();
+	public static String generateRandomSalt() {
+		final Random r = new SecureRandom();
+		byte[] Bsalt = new byte[SALT_LENGTH];
+		r.nextBytes(Bsalt);
+		return new String(Bsalt);
 	}
 }
