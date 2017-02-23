@@ -5,22 +5,26 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.crypto.SealedObject;
 import javax.swing.JOptionPane;
 
 public class SocketThread extends Thread {
-	ServerSocket ss = null;
-	Boolean usePassword = null;
-	String Hpassword = null;
-	Boolean exitWhenFinished = null;
-	private static final String SALT = CryptoFunctions.generateRandomSalt();	// Random salt!
+	private ServerSocket ss = null;
+	private Boolean usePassword = null;
+	private String password = null;
+	private Boolean exitWhenFinished = null;
+	private static final KeyPair keypair = CryptoFunctions.generateKeys();
 	
 	// BRUTE FORCE PROTECTION
 	private static int LimitFailedPasswords = 10;	// Just in case something goes wrong (it shouldn't), I set it to 10.
@@ -29,10 +33,9 @@ public class SocketThread extends Thread {
 	public SocketThread(ServerSocket ss, Boolean usePassword, String password, Boolean exitWhenFinished, int LimitFailedPasswords) {
 		this.ss = ss;
 		this.usePassword = usePassword;
+		this.password = password;
 		this.exitWhenFinished = exitWhenFinished;
 		SocketThread.LimitFailedPasswords = LimitFailedPasswords;
-		
-		this.Hpassword = CryptoFunctions.hash(password, SALT);
 	}
 	
 	public void run() {
@@ -66,16 +69,20 @@ public class SocketThread extends Thread {
 					if(usePassword) {
 						os.write(new byte[]{ 0x01 });
 						
-						os.write(SALT.getBytes()); // SEND SALT
+						ObjectOutputStream oos = new ObjectOutputStream(os);
+						oos.writeObject(keypair.getPublic());	// Send public key
 						
-						byte[] firstByte = new byte[1];
-						is.read(firstByte);
-						byte[] restBytes = new byte[is.available()];
-						is.read(restBytes);
+						ObjectInputStream ois = new ObjectInputStream(is);
+						SealedObject sealedObject = null;
+						try {
+							sealedObject = (SealedObject)ois.readObject();	// Receive encrypted password
+						} catch (ClassNotFoundException e) {
+							e.printStackTrace();
+						}
 						
-						String enteredPassword = new String(firstByte) + new String(restBytes);
+						String enteredPassword = CryptoFunctions.decrypt(keypair.getPrivate(), sealedObject);	// Decrypt password
 						
-						if(enteredPassword.equals(Hpassword)) {
+						if(enteredPassword.equals(password)) {
 							os.write(new byte[]{ 0x00 });
 						} else {	// Wrong password! :(
 							FailedPasswords++;
