@@ -346,7 +346,7 @@ public class Main extends JFrame {
 	
 	private void startSharing() {
 		try {
-			if(new String(password.getPassword()).equals("")) {
+			if(protectWithPassword.isSelected() && new String(password.getPassword()).equals("")) {
 				JOptionPane.showMessageDialog(null, "The password field is empty!");
 				return;
 			}
