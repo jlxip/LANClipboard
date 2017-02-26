@@ -1,82 +1,41 @@
 package net.jlxip.lanclipboard;
 
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SealedObject;
+import java.security.SecureRandom;
+import java.util.Random;
 
 public class CryptoFunctions {
-	private static final String RSA = "RSA";
-	public static KeyPair generateKeys() {
-		KeyPairGenerator kpg = null;
+	public static final String HASH_ALGORITHM = "SHA-256";
+	public static final String HASH_ENCODING = "UTF-8";
+	public static String hash(String password, String SALT) {
+		password += SALT;
+		
+		MessageDigest md = null;
 		try {
-			kpg = KeyPairGenerator.getInstance(RSA);
+			md = MessageDigest.getInstance(HASH_ALGORITHM);
 		} catch (NoSuchAlgorithmException e) {
 			// This shouldn't be called.
 		}
-		
-		KeyPair pair = kpg.generateKeyPair();
-		
-		return pair;
-	}
-	
-	public static SealedObject encrypt(PublicKey pub, String password) {
-		Cipher c = null;
 		try {
-			c = Cipher.getInstance(RSA);
-		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+			md.update(password.getBytes(HASH_ENCODING));
+		} catch (UnsupportedEncodingException e) {
 			// This shouldn't be called.
 		}
 		
-		try {
-			c.init(Cipher.ENCRYPT_MODE, pub);
-		} catch (InvalidKeyException e) {
-			System.out.println("Invalid public key!");
-			e.printStackTrace();
-		}
+		String Hpassword = String.format("%064x", new java.math.BigInteger(1, md.digest()));
 		
-		SealedObject encrypted = null;
-		try {
-			encrypted = new SealedObject(password, c);
-		} catch (IllegalBlockSizeException | IOException e) {
-			System.out.println("There was an error encrypting");
-			e.printStackTrace();
-		}
+		password = null;
 		
-		return encrypted;
+		return Hpassword;
 	}
 	
-	public static String decrypt(PrivateKey priv, SealedObject encrypted) {
-		Cipher c = null;
-		try {
-			c = Cipher.getInstance(RSA);
-		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-			// This shouldn't be called.
-		}
-		
-		try {
-			c.init(Cipher.DECRYPT_MODE, priv);
-		} catch (InvalidKeyException e) {
-			System.out.println("Invalid private key!");
-			e.printStackTrace();
-		}
-		
-		String password = null;
-		try {
-			password = (String)encrypted.getObject(c);
-		} catch (ClassNotFoundException | IllegalBlockSizeException | BadPaddingException | IOException e) {
-			e.printStackTrace();
-		}
-		
-		return password;
+	public static final int SALT_LENGTH = 18;
+	public static String generateRandomSalt() {
+		final Random r = new SecureRandom();
+		byte[] Bsalt = new byte[SALT_LENGTH];
+		r.nextBytes(Bsalt);
+		return new String(Bsalt);
 	}
 }

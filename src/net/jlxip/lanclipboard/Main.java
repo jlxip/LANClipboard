@@ -8,18 +8,14 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import javax.crypto.SealedObject;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
@@ -34,9 +30,9 @@ import javax.swing.JTabbedPane;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.border.TitledBorder;
 
 public class Main extends JFrame {
 	static final int PORT = 24812;
@@ -141,21 +137,21 @@ public class Main extends JFrame {
 						byte[] usePassword = new byte[1];
 						is.read(usePassword);
 						if(usePassword[0] == 0x01) {
-							ObjectInputStream ios = new ObjectInputStream(is);
-							PublicKey pub = null;
-							try {
-								pub = (PublicKey)ios.readObject();	// Receive public key
-							} catch (ClassNotFoundException e) {
-								e.printStackTrace();
+							byte[] bSALT = new byte[CryptoFunctions.SALT_LENGTH];
+							while(!(is.available() == CryptoFunctions.SALT_LENGTH)) { // Waiting until the whole salt is sent.
+								try {
+									Thread.sleep(10);
+								} catch (InterruptedException e) {
+									e.printStackTrace();
+								}
 							}
+							is.read(bSALT);
+							final String SALT = new String(bSALT);
 							
 							state.setText("State: asking password.");
 							String password = EnterPassword.run();
-							SealedObject Epassword = CryptoFunctions.encrypt(pub, password);	// Encrypt public key
-							
-							ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-							oos.writeObject(Epassword);		// Send encrypted public key
-							
+							String Hpassword = CryptoFunctions.hash(password, SALT);
+							socket.getOutputStream().write(Hpassword.getBytes());
 							byte[] correct = new byte[1];
 							is.read(correct);
 							if(correct[0] == 0x01) {
