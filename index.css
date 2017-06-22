@@ -37,6 +37,18 @@ div.button {
 	text-decoration: none;
 }
 
+@keyframes buttonHover {
+	to {
+		color: rgba(255, 255, 255, 0.8);
+		background-color: rgba(255, 255, 255, 0.2);
+		border-color: rgba(255, 255, 255, 0.3);
+	}
+}
+div.button:hover {
+	animation: buttonHover 0.5s 1 0s;
+	animation-fill-mode: forwards;
+}
+
 
 
 div#video h2 {
