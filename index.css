@@ -1,0 +1,73 @@
+header {
+	margin-bottom: 64px;
+	padding: 32px;
+	background-color: black;
+	background: linear-gradient(120deg, #155799, #159957);	/* Stolen from Cayman */
+}
+
+h1, h3 {
+	font-family: 'Lato', sans-serif;
+	text-align: center;
+	color: white;
+}
+
+h1 {
+	font-size: 4em;
+}
+
+h3 {
+	font-size: 1.8em;
+	color: #a5cdd1;
+}
+
+a { text-decoration: none; }
+div.button {
+	display: block;
+	margin: 0 auto;
+	padding: 8px;
+	width: 256px;
+	margin-bottom: 16px;
+
+	border: 1px solid #439194;
+	border-radius: 50px;	/* Best border ever */
+
+	font-family: 'Arial', sans-serif;
+	color: #a5cdd1;
+	text-align: center;
+	text-decoration: none;
+}
+
+
+
+div#video h2 {
+	font-family: 'Lato', sans-serif;
+	text-align: center;
+	font-size: 2.5em;
+}
+
+div#video iframe {
+	display: block;
+	margin: 0 auto;
+}
+
+div#video {
+	margin-bottom: 64px;
+}
+
+
+
+div#howto, div#features {
+	display: block;
+	margin: 0 auto;
+	width: 720px;
+	margin-bottom: 64px;
+}
+
+div#howto h2, div#features h2 {
+	font-family: 'Lato', sans-serif;
+	font-size: 2em;
+}
+
+div#howto p, div#features p {
+	font-family: 'Arial', sans-serif;
+}
