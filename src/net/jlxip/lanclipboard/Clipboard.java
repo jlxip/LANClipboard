@@ -30,13 +30,20 @@ public class Clipboard {
 				type = 0;
 				type0 = (String)Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.stringFlavor);
 				if(type0 == null) type0 = "";	// Is this necessary?
-				if(type0.length() > 8 && type0.substring(0, 8).equals("file:///")) {	// Clipboard on linux works like this
-					type = 1;
-					Pattern Pendline = Pattern.compile(Pattern.quote("\r\n"));	// This is it
-					String[] files = Pendline.split(type0);
-					type1 = new ArrayList<File>();
-					for(int i=0;i<files.length;i++) {
-						type1.add(new File(files[i].substring(7)));
+				
+				if(System.getProperty("os.name").equals("Linux")) {	// Clipboard on linux works like this
+					if(b[0].toString().contains("uri-list") || type0.substring(0, 8).equals("file:///")) {
+						type = 1;
+						Pattern Pendline = Pattern.compile(Pattern.quote("\r\n"));	// This is it
+						String[] files = Pendline.split(type0);
+						type1 = new ArrayList<File>();
+						for(int i=0;i<files.length;i++) {
+							if(type0.substring(0, 8).equals("file:///")) {
+								type1.add(new File(files[i].substring(7)));
+							} else {
+								type1.add(new File(files[i]));
+							}
+						}
 					}
 				}
 			} else if(b[0].equals(DataFlavor.javaFileListFlavor)) {	// FILE
