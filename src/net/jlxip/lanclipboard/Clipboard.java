@@ -8,7 +8,9 @@ import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class Clipboard {
 	@SuppressWarnings("unchecked")
@@ -28,6 +30,15 @@ public class Clipboard {
 				type = 0;
 				type0 = (String)Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.stringFlavor);
 				if(type0 == null) type0 = "";	// Is this necessary?
+				if(type0.length() > 8 && type0.substring(0, 8).equals("file:///")) {	// Clipboard on linux works like this
+					type = 1;
+					Pattern Pendline = Pattern.compile(Pattern.quote("\r\n"));	// This is it
+					String[] files = Pendline.split(type0);
+					type1 = new ArrayList<File>();
+					for(int i=0;i<files.length;i++) {
+						type1.add(new File(files[i].substring(7)));
+					}
+				}
 			} else if(b[0].equals(DataFlavor.javaFileListFlavor)) {	// FILE
 				type = 1;
 				type1 = (List<File>)Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.javaFileListFlavor);
