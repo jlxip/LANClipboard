@@ -269,7 +269,7 @@ public class Main extends JFrame {
 		panel.add(lblScanTimeout);
 		
 		JPanel panel_1 = new JPanel();
-		tabbedPane.addTab("Send", null, panel_1, null);
+		tabbedPane.addTab("Share", null, panel_1, null);
 		panel_1.setLayout(null);
 		
 		btnStartSharing = new JButton("START SHARING");
@@ -325,7 +325,7 @@ public class Main extends JFrame {
 		});
 		
 		JLabel lblQuickAccess = new JLabel("Quick access:");
-		lblQuickAccess.setBounds(12, 13, 78, 16);
+		lblQuickAccess.setBounds(12, 13, 108, 16);
 		contentPane.add(lblQuickAccess);
 		
 		quickRun = new JButton("Run server with default configuration");
@@ -334,7 +334,7 @@ public class Main extends JFrame {
 				startSharing();
 			}
 		});
-		quickRun.setBounds(102, 9, 253, 25);
+		quickRun.setBounds(132, 9, 286, 25);
 		contentPane.add(quickRun);
 		
 		update();
