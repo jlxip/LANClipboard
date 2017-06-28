@@ -18,7 +18,7 @@ import javax.swing.JOptionPane;
 public class SocketThread extends Thread {
 	ServerSocket ss = null;
 	Boolean usePassword = null;
-	String Hpassword = null;
+	String encryptionPassword = null;
 	Boolean exitWhenFinished = null;
 	private static final String SALT = CryptoFunctions.generateRandomSalt();	// Random salt!
 	
@@ -32,7 +32,7 @@ public class SocketThread extends Thread {
 		this.exitWhenFinished = exitWhenFinished;
 		SocketThread.LimitFailedPasswords = LimitFailedPasswords;
 		
-		this.Hpassword = CryptoFunctions.hash(password, SALT);
+		this.encryptionPassword = CryptoFunctions.hash(password, SALT);	// An encryption password of 128 bits (16 bytes) is required.
 	}
 	
 	public void run() {
@@ -70,12 +70,28 @@ public class SocketThread extends Thread {
 						
 						byte[] firstByte = new byte[1];
 						is.read(firstByte);
-						byte[] restBytes = new byte[is.available()];
-						is.read(restBytes);
+						ArrayList<Byte> restBytesArray = new ArrayList<Byte>();
+						while(true) {
+							byte[] onebyte = new byte[1];
+							is.read(onebyte);
+							if(onebyte[0] != (byte)0x90) restBytesArray.add(onebyte[0]);
+							else break;
+						}
 						
-						String enteredPassword = new String(firstByte) + new String(restBytes);
+						byte[] enteredPasswordConfirmation = new byte[1+restBytesArray.size()];
+						enteredPasswordConfirmation[0] = firstByte[0];
+						for(int i=0;i<restBytesArray.size();i++) enteredPasswordConfirmation[i+1] = restBytesArray.get(i);
+						byte[] decodedEnteredPasswordConfirmation = Base64.getDecoder().decode(enteredPasswordConfirmation);
 						
-						if(enteredPassword.equals(Hpassword)) {
+						byte[] correctPasswordConfirmation = CryptoFunctions.AESencrypt(encryptionPassword, SALT, CryptoFunctions.PASSWORD_CONFIRMATION_STRING.getBytes());
+						
+						// It's easier to check this way hahaha
+						StringBuilder sbEPC = new StringBuilder();
+					    for (byte b : decodedEnteredPasswordConfirmation) sbEPC.append(String.format("%02X", b));
+					    StringBuilder sbCPC = new StringBuilder();
+					    for (byte b : correctPasswordConfirmation) sbCPC.append(String.format("%02X", b));
+						
+						if(sbEPC.toString().equals(sbCPC.toString())) {
 							os.write(new byte[]{ 0x00 });
 						} else {	// Wrong password! :(
 							FailedPasswords++;
@@ -132,14 +148,24 @@ public class SocketThread extends Thread {
 				            }
 						}
 					}
-					arrayToSend.add(end);
 					
 					byte[] toSend = new byte[arrayToSend.size()];
 					for(int i=0;i<arrayToSend.size();i++) {
 						toSend[i] = arrayToSend.get(i);
 					}
 					
-					s.getOutputStream().write(toSend);
+					if(usePassword) {
+						toSend = CryptoFunctions.AESencrypt(encryptionPassword, SALT, toSend);	// Encrypt the data
+						toSend = Base64.getEncoder().encode(toSend);	// Now in BASE64 to allow the final 0x90 byte
+					}
+					
+					byte[] endedToSend = new byte[toSend.length + 1];
+					for(int i=0;i<toSend.length;i++) {
+						endedToSend[i] = toSend[i];
+					}
+					endedToSend[endedToSend.length-1] = end;
+					
+					s.getOutputStream().write(endedToSend);
 				}
 				
 				s.close();

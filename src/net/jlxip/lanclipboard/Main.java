@@ -30,9 +30,9 @@ import javax.swing.JTabbedPane;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.border.TitledBorder;
 
 public class Main extends JFrame {
 	static final int PORT = 24812;
@@ -54,6 +54,9 @@ public class Main extends JFrame {
 	private static final Pattern Pfile = Pattern.compile(Pattern.quote("|"));
 	private static final Pattern Pfilename = Pattern.compile(Pattern.quote("$"));
 	private static final Pattern Pspace = Pattern.compile(Pattern.quote(" "));
+	
+	private static String encryptionPassword = "";
+	private static String SALT = "";
 
 	public static void main(String[] args) {
 		try {
@@ -146,12 +149,19 @@ public class Main extends JFrame {
 								}
 							}
 							is.read(bSALT);
-							final String SALT = new String(bSALT);
+							SALT = new String(bSALT);
 							
 							state.setText("State: asking password.");
 							String password = EnterPassword.run();
-							String Hpassword = CryptoFunctions.hash(password, SALT);
-							socket.getOutputStream().write(Hpassword.getBytes());
+							encryptionPassword = CryptoFunctions.hash(password, SALT);
+							byte[] passwordConfirmation = CryptoFunctions.AESencrypt(encryptionPassword, SALT, CryptoFunctions.PASSWORD_CONFIRMATION_STRING.getBytes());
+							passwordConfirmation = Base64.getEncoder().encode(passwordConfirmation);
+							
+							byte[] endedPasswordConfirmation = new byte[passwordConfirmation.length + 1];
+							for(int i=0;i<passwordConfirmation.length;i++) endedPasswordConfirmation[i] = passwordConfirmation[i];
+							endedPasswordConfirmation[endedPasswordConfirmation.length - 1] = (byte)0x90;
+							
+							socket.getOutputStream().write(endedPasswordConfirmation);
 							byte[] correct = new byte[1];
 							is.read(correct);
 							if(correct[0] == 0x01) {
@@ -162,26 +172,33 @@ public class Main extends JFrame {
 							}
 						}
 						
-						byte[] type = new byte[1];
-						is.read(type);
+						byte[] firstByte = new byte[1];
+						is.read(firstByte);
 						
 						ArrayList<Byte> allContent = new ArrayList<Byte>();
 						
-						Boolean ended = false;
-						while(!ended) {
+						while(true) {
 							byte[] onebyte = new byte[1];
 							is.read(onebyte);
 							if(onebyte[0] != (byte)0x90) allContent.add(onebyte[0]);
-							else ended = true;
+							else break;
 						}
 						
-						byte[] content = new byte[allContent.size()];
+						byte[] all = new byte[allContent.size()+1];
+						all[0] = firstByte[0];
 						for(int i=0;i<allContent.size();i++) {
-							content[i] = allContent.get(i);
+							all[i+1] = allContent.get(i);
 						}
 						
+						if(usePassword[0] == 0x01) {
+							all = Base64.getDecoder().decode(all);	// It's in BASE64
+							all = CryptoFunctions.AESdecrypt(encryptionPassword, SALT, all);	// Decrypt it
+						}
 						
-						if(type[0] == 0x00) {	// STRING
+						byte[] content = new byte[all.length-1];
+						for(int i=0;i<content.length;i++) content[i] = all[i+1];
+						
+						if(all[0] == 0x00) {	// STRING
 							String text = new String(Base64.getDecoder().decode(content));
 							Clipboard.setClipboard(text);
 						} else {	// FILE
