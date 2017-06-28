@@ -8,25 +8,17 @@ import java.util.Random;
 
 public class CryptoFunctions {
 	public static final String HASH_ALGORITHM = "SHA-256";
-	public static final String HASH_ENCODING = "UTF-8";
 	public static String hash(String password, String SALT) {
 		password += SALT;
 		
 		MessageDigest md = null;
 		try {
 			md = MessageDigest.getInstance(HASH_ALGORITHM);
-		} catch (NoSuchAlgorithmException e) {
-			// This shouldn't be called.
-		}
-		try {
-			md.update(password.getBytes(HASH_ENCODING));
-		} catch (UnsupportedEncodingException e) {
-			// This shouldn't be called.
-		}
+			md.update(password.getBytes());
+		} catch (Exception e) {}	// This shouldn't be called.
 		
 		String Hpassword = String.format("%064x", new java.math.BigInteger(1, md.digest()));
 		
-		password = null;
 		
 		return Hpassword;
 	}
