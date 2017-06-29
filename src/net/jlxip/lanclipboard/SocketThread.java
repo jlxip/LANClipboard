@@ -87,9 +87,9 @@ public class SocketThread extends Thread {
 						
 						// It's easier to check this way hahaha
 						StringBuilder sbEPC = new StringBuilder();
-					    for (byte b : decodedEnteredPasswordConfirmation) sbEPC.append(String.format("%02X", b));
-					    StringBuilder sbCPC = new StringBuilder();
-					    for (byte b : correctPasswordConfirmation) sbCPC.append(String.format("%02X", b));
+						for (byte b : decodedEnteredPasswordConfirmation) sbEPC.append(String.format("%02X", b));
+						StringBuilder sbCPC = new StringBuilder();
+						for (byte b : correctPasswordConfirmation) sbCPC.append(String.format("%02X", b));
 						
 						if(sbEPC.toString().equals(sbCPC.toString())) {
 							os.write(new byte[]{ 0x00 });
