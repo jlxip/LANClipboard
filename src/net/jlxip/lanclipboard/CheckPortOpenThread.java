@@ -38,11 +38,11 @@ public class CheckPortOpenThread extends Thread {
 		} catch(ConnectException e) {
 			// It's ok.
 		} catch (UnknownHostException e) {
-			System.out.println("This is a bug of the author (E1)!");
+			System.out.println("This is a bug! (E1)");
 		} catch (IOException e) {
 			// It's ok.
 		} catch(Exception e) {	// Other type of exception (?)
-			System.out.println("This is a bug of the author (E2)!");
+			System.out.println("This is a bug! (E2)");
 			e.printStackTrace();
 		}
 		

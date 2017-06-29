@@ -51,6 +51,7 @@ public class Clipboard {
 				type1 = (List<File>)Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.javaFileListFlavor);
 			} else {
 				System.out.println("BUG BUG BUG BUG BUG");
+				System.out.println("Please, submit this on the project issue board.");
 				System.out.println("TYPE: "+b[0]);
 			}
 		} catch (HeadlessException e) {
@@ -79,22 +80,21 @@ public class Clipboard {
 	}
 	
 	public static void setClipboard(List<File> files) {
-		Toolkit.getDefaultToolkit().getSystemClipboard().setContents(
-				new Transferable() {
-					@Override
-				    public DataFlavor[] getTransferDataFlavors() {
-				        return new DataFlavor[] { DataFlavor.javaFileListFlavor };
-				    }
+		Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new Transferable() {
+				@Override
+				public DataFlavor[] getTransferDataFlavors() {
+					return new DataFlavor[] { DataFlavor.javaFileListFlavor };
+				}
 
-				    @Override
-				    public boolean isDataFlavorSupported(DataFlavor flavor) {
-				        return DataFlavor.javaFileListFlavor.equals(flavor);
-				    }
+				@Override
+				public boolean isDataFlavorSupported(DataFlavor flavor) {
+					return DataFlavor.javaFileListFlavor.equals(flavor);
+				}
 
-				    @Override
-				    public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
-				        return files;
-				    }
-				}, null);
+				@Override
+				public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
+					return files;
+				}
+			}, null);
 	}
 }

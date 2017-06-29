@@ -19,7 +19,7 @@ public class LAN {
 		reachableHosts.add(HOST);
 	}
 	
-	public static ArrayList<String> getHosts(String subnet) {	// Very root source: https://goo.gl/9X75Ft
+	public static ArrayList<String> getHosts(String subnet) {	// Root source: https://goo.gl/9X75Ft
 		finishedThreads = 0;
 		reachableHosts = new ArrayList<String>();
 		

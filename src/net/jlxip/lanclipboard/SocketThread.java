@@ -58,8 +58,8 @@ public class SocketThread extends Thread {
 				InputStream is = s.getInputStream();
 				s.getInputStream().read(recv);
 				if(recv[0] == 0x01) {	// Up?
-					if(usePassword) s.getOutputStream().write(0x01);	// Sure! PWD!
-					else s.getOutputStream().write(0x00);	// Sure! FREE!
+					if(usePassword) os.write(0x01);	// Sure! PWD!
+					else os.write(0x00);	// Sure! FREE!
 				} else {
 					if(exitWhenFinished) exit = true;
 					
@@ -160,12 +160,10 @@ public class SocketThread extends Thread {
 					}
 					
 					byte[] endedToSend = new byte[toSend.length + 1];
-					for(int i=0;i<toSend.length;i++) {
-						endedToSend[i] = toSend[i];
-					}
+					for(int i=0;i<toSend.length;i++) endedToSend[i] = toSend[i];
 					endedToSend[endedToSend.length-1] = end;
 					
-					s.getOutputStream().write(endedToSend);
+					os.write(endedToSend);
 				}
 				
 				s.close();

@@ -15,12 +15,11 @@ public class EnterPassword {
 		panel.add(pass);
 		String[] options = new String[]{"OK", "Cancel"};
 		int option = JOptionPane.showOptionDialog(null, panel, "Enter password",
-		                         JOptionPane.NO_OPTION, JOptionPane.PLAIN_MESSAGE,
-		                         null, options, options[0]);
-		if(option == 0) { // pressing OK button
-		    char[] password = pass.getPassword();
-		    
-		    return new String(password);
+				JOptionPane.NO_OPTION, JOptionPane.PLAIN_MESSAGE,
+				null, options, options[0]);
+		if(option == 0) { // OK button
+			char[] password = pass.getPassword();
+			return new String(password);
 		} else {
 			return null;
 		}

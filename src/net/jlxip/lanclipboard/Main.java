@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -133,7 +134,8 @@ public class Main extends JFrame {
 					
 					try {
 						Socket socket = new Socket(host, PORT);
-						socket.getOutputStream().write(0x00);
+						OutputStream os = socket.getOutputStream();
+						os.write(0x00);
 						
 						InputStream is = socket.getInputStream();
 						
@@ -161,7 +163,7 @@ public class Main extends JFrame {
 							for(int i=0;i<passwordConfirmation.length;i++) endedPasswordConfirmation[i] = passwordConfirmation[i];
 							endedPasswordConfirmation[endedPasswordConfirmation.length - 1] = (byte)0x90;
 							
-							socket.getOutputStream().write(endedPasswordConfirmation);
+							os.write(endedPasswordConfirmation);
 							byte[] correct = new byte[1];
 							is.read(correct);
 							if(correct[0] == 0x01) {
@@ -214,7 +216,7 @@ public class Main extends JFrame {
 									TEMPORAL_PATH = System.getenv("TEMP");
 								} else if(System.getProperty("os.name").toLowerCase().contains("linux")) {
 									TEMPORAL_PATH = "/tmp";
-								}
+								}	// TODO: Mac OS X
 								
 								File file = new File(TEMPORAL_PATH + File.separator + filename);
 								FileOutputStream fos = new FileOutputStream(file);

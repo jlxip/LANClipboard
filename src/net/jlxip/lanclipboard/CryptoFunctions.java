@@ -45,8 +45,7 @@ public class CryptoFunctions {
 			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
 			cipher.init(Cipher.ENCRYPT_MODE, skeySpec, iv);
 
-			byte[] encrypted = cipher.doFinal(value);
-			return encrypted;
+			return cipher.doFinal(value);
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
@@ -62,8 +61,7 @@ public class CryptoFunctions {
 			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
 			cipher.init(Cipher.DECRYPT_MODE, skeySpec, iv);
 
-			byte[] original = cipher.doFinal(encrypted);
-			return original;
+			return cipher.doFinal(encrypted);
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
